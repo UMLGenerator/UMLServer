@@ -11,11 +11,6 @@ app = Flask(__name__)
 def hello():
 	return "Add /uml to the end of the address to generate UML!"
 
-@app.route("/smell/<name>")
-def smelly(name):
-	out = name + " smells"
-	return out
-
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
