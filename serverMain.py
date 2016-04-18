@@ -44,19 +44,12 @@ def generateUML():
 
 	return "Error? How do I handle this?"
 
-# Include error checking for if image is there, etc
-@app.route("/email")
-def sendMail():
-	# mail(user, "UML Diagram", "Attached is your picture!", image)
-	toEmail = "tmfulton@email.wm.edu" #change
-	mail(toEmail, "UML Diagram", "Attached is your picture!", imageName)
-	return "Your email is being sent"
-
 # Option in the future
-# @app.route("/email/<user>")
-# def sendMail(user):
-# 	mail(user, "UML Diagram", "Attached is your picture!", image)
-# 	return "Your email is being sent"
+# Include error checking for if image is there, etc
+@app.route("/email/<user>")
+def sendMailToUser(user):
+  mail(user, "UML Diagram", "Attached is your picture!", imageName)
+  return "Your email is being sent to " + user
 
 
 def mail(to, subject, text, attach):
