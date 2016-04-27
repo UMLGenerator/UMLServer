@@ -12,9 +12,6 @@ from email import encoders
 
 ALLOWED_EXTENSIONS = set(['txt', 'xmi'])
 
-xmiFilePath = ""
-plantFilePath = ""
-
 # https://www.google.com/settings/security/lesssecureapps
 # Use to allow login from this application
 gmail_user = "umlgenerator@gmail.com"
@@ -31,38 +28,36 @@ def allowed_file(filename):
 	return '.' in filename and \
 		filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-@app.route("/upload", methods=['GET', 'POST'])
-def generateUML():
+@app.route("/upload/<user>", methods=['GET', 'POST'])
+def generateUML(user):
 	if request.method == 'POST':
 		plantFile = request.files['plantUML']
 		xmiFile = request.files['xmi']
-		if plantFile and allowed_file(plantFile.filename) and xmiFile and allowed_file(xmiFile.filename):
+		if plantFile and xmiFile:
 			plantFileName = secure_filename(plantFile.filename)
 			plantFile.save(app.config["DIR"] + "/" + plantFileName)
 			plantFilePath = app.config["DIR"] + "/" + plantFileName
+
 			xmiFileName = secure_filename(xmiFile.filename)
 			xmiFile.save(app.config["DIR"] + "/" + xmiFileName)
 			xmiFilePath = app.config["DIR"] + "/" + xmiFileName
+
 			plantUMLCommand = ["java", "-jar", "./plantuml.jar", plantFilePath]
 			p = subprocess.call(plantUMLCommand)
 			pngFileName = plantFileName.replace(".txt", ".png")
 			pngFile = open(pngFileName, "r")
-			return send_file(pngFileName, mimetype='image/png')
-			# return send_file(pngFileName)
+			# return send_file(pngFileName, mimetype='image/png')
+			return sendMailToUser(user, plantFileName, xmiFileName)
 
 	return "Error? How do I handle this?"
 
-
-# Option in the future
-# Include error checking for if image is there, etc
-@app.route("/email/<user>")
-def sendMailToUser(user):
+def sendMailToUser(user, plantFilePath, xmiFilePath):
 	directory = user + "_UMLDiagram"
 
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 
-	newImageName = plantFilePath.replace('txt', "png")
+	newImageName = plantFilePath + ".png"
 	curPathImage = "./" + newImageName
 	newPathImage = directory + "/" + newImageName
 	os.rename(curPathImage, newPathImage)
